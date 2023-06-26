@@ -14,7 +14,7 @@ TOOLS_DIR = tools
 .PHONY: all floppy_img kernel bootloader clean always tools_fat
 
 #all
-all: tools_fat floppy_img
+all: tools_fat debug_tools floppy_img
 
 #floppy img
 
@@ -23,7 +23,7 @@ floppy_img: $(BUILD_DIR)/main_floppy.img
 $(BUILD_DIR)/main_floppy.img: bootloader kernel
 	dd if=/dev/zero of=$(BUILD_DIR)/main_floppy.img bs=512 count=2880
 	mkfs.fat -F 12 -n "XCORP OS" $(BUILD_DIR)/main_floppy.img
-	dd if=build/bootloader.bin of=build/main_floppy.img conv=notrunc
+	dd if=$(BUILD_DIR)/bootloader.bin of=$(BUILD_DIR)/main_floppy.img conv=notrunc
 	mcopy -i $(BUILD_DIR)/main_floppy.img $(BUILD_DIR)/kernel.bin "::kernel.bin"
 	mcopy -i $(BUILD_DIR)/main_floppy.img $(TOOLS_DIR)/FAT12/test.txt "::text.txt"
 
@@ -39,15 +39,22 @@ kernel: $(BUILD_DIR)/kernel.bin
 $(BUILD_DIR)/kernel.bin: always
 	$(ASM) $(SRC_DIR)/kernel/main.asm -f bin -o $(BUILD_DIR)/kernel.bin
 
+# TOOLS
 # FAT tools
 tools_fat: $(BUILD_DIR)/tools/fat
 
 $(BUILD_DIR)/tools/fat: $(TOOLS_DIR)/FAT12/fat.c $(TOOLS_DIR)/FAT12/headers/fat12.h $(TOOLS_DIR)/FAT12/fat12.c
 	gcc -o $(BUILD_DIR)/tools/fat $(TOOLS_DIR)/FAT12/fat.c $(TOOLS_DIR)/FAT12/fat12.c -I$(TOOLS_DIR)/FAT12/headers
 
+#Debug tools
+debug_tools: always $(BUILD_DIR)/tools/debug/readImage
+
+$(BUILD_DIR)/tools/debug/readImage: $(TOOLS_DIR)/DEBUG/readImage.c
+	gcc -o $(BUILD_DIR)/tools/debug/readImage $(TOOLS_DIR)/DEBUG/readImage.c
+
 #always
 always:
-	mkdir -p $(BUILD_DIR)/tools
+	mkdir -p $(BUILD_DIR)/tools/debug
 
 #clean
 clean:

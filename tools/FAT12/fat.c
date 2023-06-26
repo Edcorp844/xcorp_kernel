@@ -9,20 +9,6 @@ BootSector g_bootSector;
 uint8_t* g_fat = NULL;
 DirectoryEntry* g_RootDirectory;
 
-void printHex(FILE* file) {
-    unsigned char buffer[16];
-    size_t bytesRead;
-    size_t i;
-
-    while ((bytesRead = fread(buffer, sizeof(unsigned char), 16, file)) > 0) {
-        for (i = 0; i < bytesRead; i++) {
-            printf("%02X ", buffer[i]); // Print each byte in hexadecimal format
-        }
-        printf("\n");
-    }
-}
-
-
 int main(int argc, char **argv) {
 
     if (argc < 3) {
@@ -40,8 +26,6 @@ int main(int argc, char **argv) {
     }
     printf("\033[32m[✔️] \033[0mDisk image opened \033[36m:)\n");
 
-//	 printHex(disk);
-
     if(!readBootSector(disk, g_bootSector)) {
         fprintf(stderr, "\\033[31m[X] \033[41mError 0003\033[0m: Could not read boot sector \033[35m:(\n");
         return -2;
@@ -54,7 +38,7 @@ int main(int argc, char **argv) {
         free(g_fat);
         return -3;
     }
-     printf("\033[32m[✔️] \033[0mFAT read successfully \033[36m:)\n");
+      printf("\033[32m[✔️] \033[0mFAT read successfully \033[36m:)\n");
 
 
     if(!readRootDirectory(disk, g_bootSector, g_RootDirectory)) {
@@ -67,7 +51,7 @@ int main(int argc, char **argv) {
 
     DirectoryEntry* fileEntry = findFile(argv[2], g_bootSector, g_RootDirectory);
     if(!fileEntry) {
-        fprintf(stderr, "\\033[31m[X] \033[41mError 0005\033[0m: Could not find file %s \033[35m:(\n", argv[2]);
+        fprintf(stderr, "\033[31m[X] \033[0m\033[41mError 0005\033[0m: Could not find file %s \033[35m:(\n", argv[2]);
         free(g_fat);
         free(g_RootDirectory);
         return -5;
