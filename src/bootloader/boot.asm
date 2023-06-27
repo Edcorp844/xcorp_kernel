@@ -1,3 +1,5 @@
+
+
 org 0x7C00
 bits 16
 
@@ -33,35 +35,6 @@ ebr_system_id:			db 'FAT12   '		;8 bytes also padded with spaces
 
 
 start:
-	jmp main
-
-;function to print string on to the screen
-; params:
-;	ds:si point to string
-;
-puts:
-	;save registers we will modify
-	push si
-	push ax
-
-.loop:
-	lodsb		;loads next character in al
-	or al, al	;check if next charater is null
-	jz .done
-
-	mov ah, 0x0e
-	mov bh, 0
-	int 0x10
-
-	jmp .loop
-
-.done:
-	pop ax
-	pop si
-	ret
-
-
-main:
 	;set up data segments
 	mov ax, 0 	;cant write directly to ds/es
 	mov ds, ax
@@ -71,18 +44,67 @@ main:
 	mov ss, ax
 	mov sp, 0x7C00 	;stack grows downwards
 
-	;read something from floppy disk
-	;BIOS should set dl to drive number
+	;some BIOS'es might start us at 07C0:0000 instead of 0000:07C0, make sure we are in the expected location
+	push es
+	push word .after
+	retf
+
+.after:
+	;read some thing from the disk
+	;set the DL to drive number
 	mov [ebr_drive_number], dl
 
-	mov ax, 1	;LBA=1.....second ector to read
-	mov cl, 1	;1 sector to read
-	mov bx, 0x7E00	;data should be afterthe boot loader
-	call read_disk
-
-	;print msg on the screen
-	mov si, hello_msg
+	;print loading msg on the screen
+	mov si, msg_loading
 	call puts
+
+	;read drive parameters(sectors per track and head) you don't wanna rely on the disk...than the bois
+	;note: This cannot be hard coded
+	push es
+	mov ah, 08h
+	int 13h
+	jc floppy_error
+	pop es
+	and cl, 0x3F				;remove 2 top bits
+	xor ch, ch
+	mov [bdb_sectors_per_track], cx		;sector count
+
+	inc dh
+	mov [bdb_heads], dh			;head count
+
+	;read FAT root directory
+	mov ax, [bdb_sectors_per_fat]		;compare LBA for root directory = reserved + fats * sectors per fat
+	mov bl, [bdb_fat_count]
+	xor bh, bh
+	mul bx					;dx:ax = (fats * sectors per fat)
+	add ax, [bdb_reserved_sectors]		;LBA rootdirectory
+	push ax
+
+	;compute size of root directory = (32 * number_of_entries)/ bytes per sector
+	mov ax, [bdb_sectorper_fat]
+	shl ax, 5				;ax *= 32
+	xor dx, dx				;dx = 0
+	div word [bdb_bytes_per_sector]		;number of sectors we need to read
+
+
+	test dx, dx				;if dx != 0, add 1
+	jz .root_dir_after
+	inc ax					;division reminder != 0, add 1
+						;this means we have a sector only partialyy filed with entries
+
+.root_dir_after:
+	;read root dir
+	mov cl, al				;cl = number of sectors to read = size of root directory
+	pop ax					;ax = LBA of root directory
+	mov dl, [ebr_drive_number]		;dl = drive number..we saved it previously
+	mov bx, buffer				;es:bx = buffer
+	call disk_read
+
+	;search for kernel.bin through the directory entries
+	xor bx, bx
+	mov di, buffer
+.serach_kernel:
+	
 
 	cli
 	hlt
@@ -103,6 +125,30 @@ wait_key_and_reboot:
 	jmp .halt
 
 
+;function to print string on to the screen
+; params:
+;       ds:si point to string
+;
+puts:
+        ;save registers we will modify
+        push si
+        push ax
+
+.loop:
+        lodsb           ;loads next character in al
+        or al, al       ;check if next charater is null
+        jz .done
+
+        mov ah, 0x0e
+        mov bh, 0
+        int 0x10
+
+        jmp .loop
+
+.done:
+        pop ax
+        pop si
+        ret
 
 ;Disk routines
 ;conversts Logical Block Address (LBA) to CHS address
@@ -199,9 +245,13 @@ disk_reset:
 	popa
 	ret
 
-hello_msg: db 'Xcorp os', ENDL, 0
-
+;string lables
+msg_loading: db 'Xcorp is Loading components...', ENDL, 0
 msg_read_failed: db 'Failed to read disk', ENDL, 0
+file_kernel_bin: db 'KERNEL  BIN'
 
+;padding the  510 bytes with 0's
 times 510-($-$$) db 0
-dw 0AA55h
+dw 0AA55h	;adding aa55 to make 51bytes with tell the bois this is the bootsector
+
+buffer:
