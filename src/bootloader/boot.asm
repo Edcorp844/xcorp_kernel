@@ -104,7 +104,7 @@ start:
 	xor bx, bx
 	mov di, buffer
 .serach_kernel:
-	
+	mov si, file_kernel_bin
 
 	cli
 	hlt
