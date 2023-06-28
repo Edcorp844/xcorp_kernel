@@ -1,5 +1,3 @@
-
-
 org 0x7C00
 bits 16
 
@@ -81,7 +79,7 @@ start:
 	push ax
 
 	;compute size of root directory = (32 * number_of_entries)/ bytes per sector
-	mov ax, [bdb_sectorper_fat]
+	mov ax, [bdb_sectors_per_fat]
 	shl ax, 5				;ax *= 32
 	xor dx, dx				;dx = 0
 	div word [bdb_bytes_per_sector]		;number of sectors we need to read
@@ -98,13 +96,94 @@ start:
 	pop ax					;ax = LBA of root directory
 	mov dl, [ebr_drive_number]		;dl = drive number..we saved it previously
 	mov bx, buffer				;es:bx = buffer
-	call disk_read
+	call read_disk
 
 	;search for kernel.bin through the directory entries
 	xor bx, bx
 	mov di, buffer
-.serach_kernel:
+.search_kernel:
 	mov si, file_kernel_bin
+	mov cx, 11				;move up 11 characters to compare in cx
+	push di
+	repe cmpsb
+	pop di
+	je .found_kernel
+	add di, 32
+	inc bx
+	cmp bx, [bdb_dir_entries_count]
+	jl .search_kernel
+
+	;kernel not found
+	jmp kernel_not_found_error
+
+.found_kernel:
+	;di  should contain the address of the entry
+	mov ax, [di + 26]			;first logical cluster (offset = 26)
+	mov [kernel_cluster], ax
+
+	;load FAT from disk into memory
+	mov ax, [bdb_reserved_sectors]
+	mov bx, buffer
+	mov cl, [bdb_sectors_per_fat]
+	mov dl, [ebr_drive_number]
+	call read_disk
+
+	;read cluster and process FAT chain
+	mov bx, KERNEL_LOAD_SEGMANT
+	mov es, bx
+	mov bx, KERNEL_LOAD_OFFSET
+
+.load_kernel_loop:
+	;read next cluster
+	mov ax, [kernel_cluster]
+
+	;THIS WAS HARD CORDING VALUE...I'll need to fix this in the future to avoid problems
+	add ax, 31
+
+
+	mov cl, 1
+	mov dl, [ebr_drive_number]
+	call read_disk
+
+	add bx, [bdb_bytesper_sector]
+	;compute location of next cluster
+	mov ax, [kernel_cluster]
+	mov cx, 3
+	mul cx
+	mov cx, 2
+	div cx					;ax = index of entry in FAT. dx = cluster mod 2
+	mov si, buffer
+	add si, ax
+	mov ax, [ds:si]				;read entry from FAt table at ax
+
+	or dx,dx
+	jz .even
+
+.odd:
+	shr ax, 4
+	jmp .next_cluster_after
+
+.even:
+	and ax, 0x0FFF
+
+.next_cluster_after:
+	cmp ax, 0x0FF8				;end of chain
+	jae .read_finish
+
+	mov [kernel_cluster], ax
+	jmp .load_kernel_loop
+.read_finish:
+	;jum to our kernel
+	mov dl, [ebr_drive_number]		;boot device in dl
+
+
+	mov ax, KERNEL_LOAD_SEGMENT		;set segment registers
+	mov ds, ax
+	mov es, ax
+
+	jmp KERNEL_LOAD_SEGMANT:KERNEL_LOAD_OFFSET
+
+	jmp wait_key_and_reboot			;should never happen
 
 	cli
 	hlt
@@ -112,6 +191,11 @@ start:
 ;error handlers
 floppy_error:
 	mov si, msg_read_failed
+	call puts
+	jmp wait_key_and_reboot
+
+kernel_not_found_error:
+	mov si, msg_not_kernel_found_error
 	call puts
 	jmp wait_key_and_reboot
 
@@ -133,6 +217,7 @@ puts:
         ;save registers we will modify
         push si
         push ax
+	push bx
 
 .loop:
         lodsb           ;loads next character in al
@@ -248,7 +333,11 @@ disk_reset:
 ;string lables
 msg_loading: db 'Xcorp is Loading components...', ENDL, 0
 msg_read_failed: db 'Failed to read disk', ENDL, 0
+msg_kernel_not_found_error: db 'Kernel.bin not found', ENDL, 0
 file_kernel_bin: db 'KERNEL  BIN'
+kernel_cluster:	dw 0
+KERNEL_LOAD_SEGMENT equ 0x2000
+KERNEL_LOAD_OFFSET  equ 0
 
 ;padding the  510 bytes with 0's
 times 510-($-$$) db 0
