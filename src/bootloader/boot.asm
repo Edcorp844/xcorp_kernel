@@ -25,7 +25,7 @@ bdb_large_sectors:		dd 0
 ebr_drive_number: 		db 0 			;0x00 floppy, 0x80 hdd, value is incorrect if device is changed
 				db 0 			;reserved
 ebr_signature:			db 29h
-ebr_volume_id:			db 12h, 34h, 54h, 78h 	;Serial number...value doesn't even matter
+ebr_volume_id:			db 10h, 14h, 54h, 78h 	;Serial number...value doesn't even matter
 ebr_volume_label:		db 'XCORP    OS'	;11 bytes padded with spaces
 ebr_system_id:			db 'FAT12   '		;8 bytes also padded with spaces
 
@@ -129,7 +129,7 @@ start:
 	call read_disk
 
 	;read cluster and process FAT chain
-	mov bx, KERNEL_LOAD_SEGMANT
+	mov bx, KERNEL_LOAD_SEGMENT
 	mov es, bx
 	mov bx, KERNEL_LOAD_OFFSET
 
@@ -145,7 +145,7 @@ start:
 	mov dl, [ebr_drive_number]
 	call read_disk
 
-	add bx, [bdb_bytesper_sector]
+	add bx, [bdb_bytes_per_sector]
 	;compute location of next cluster
 	mov ax, [kernel_cluster]
 	mov cx, 3
@@ -181,7 +181,7 @@ start:
 	mov ds, ax
 	mov es, ax
 
-	jmp KERNEL_LOAD_SEGMANT:KERNEL_LOAD_OFFSET
+	jmp KERNEL_LOAD_SEGMENT:KERNEL_LOAD_OFFSET
 
 	jmp wait_key_and_reboot			;should never happen
 
@@ -195,7 +195,7 @@ floppy_error:
 	jmp wait_key_and_reboot
 
 kernel_not_found_error:
-	mov si, msg_not_kernel_found_error
+	mov si, msg_kernel_not_found_error
 	call puts
 	jmp wait_key_and_reboot
 
@@ -331,7 +331,7 @@ disk_reset:
 	ret
 
 ;string lables
-msg_loading: db 'Xcorp is Loading components...', ENDL, 0
+msg_loading: db 'Loading xcorp...', ENDL, 0
 msg_read_failed: db 'Failed to read disk', ENDL, 0
 msg_kernel_not_found_error: db 'Kernel.bin not found', ENDL, 0
 file_kernel_bin: db 'KERNEL  BIN'
