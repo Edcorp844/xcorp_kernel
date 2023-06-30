@@ -4,30 +4,30 @@ OUTPUT_ARCH(i386)
 
 SECTIONS
 {
-    . = 0x0;      /* Set the initial offset to 0 */
-    .text :       /* Code section */
-    {
-        *(.text)
-    }
+        . = 0x0;          /* Set the initial offset to 0 */
 
-    .data :       /* Data section */
-    {
-        *(.data)
-    }
+        /* Code section */
+        .text :
+        {
+                *(.text)
+        }
 
-    .bss :        /* BSS section */
-    {
-        *(.bss)
-    }
+        /* Data section */
+        .data :
+        {
+                *(.data)
+        }
 
-    /* Define the stack section 
-    stack_start = 0x200;   Define the stack starting address 
-    stack_length = 0x400;  Define the stack size 
-    .stack ALIGN(4) :
-    {
-        PROVIDE(_stack_start = .);
-        *(.stack)
-        PROVIDE(_stack_end = .);
-    } > RAM */
+        /* BSS section */
+        .bss :
+        {
+                *(.bss)
+        }
+
+		/* Stack section */
+		.stack 0x200 :    /* Define the stack address at 0x200 */
+		 {
+			 /* No specific content for stack section */
+		}
+
 }
-
