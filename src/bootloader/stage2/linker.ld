@@ -1,33 +1,16 @@
-ENTRY(_start)
+ENTRY(entry)
 OUTPUT_FORMAT("binary")
-OUTPUT_ARCH(i386)
+phys = 0x00000500;
 
 SECTIONS
 {
-        . = 0x0;          /* Set the initial offset to 0 */
+    . = phys;
 
-        /* Code section */
-        .text :
-        {
-                *(.text)
-        }
-
-        /* Data section */
-        .data :
-        {
-                *(.data)
-        }
-
-        /* BSS section */
-        .bss :
-        {
-                *(.bss)
-        }
-
-		/* Stack section */
-		.stack 0x200 :    /* Define the stack address at 0x200 */
-		 {
-			 /* No specific content for stack section */
-		}
-
+    .entry              : { __entry_start = .;      *(.entry)   }
+    .text               : { __text_start = .;       *(.text)    }
+    .data               : { __data_start = .;       *(.data)    }
+    .rodata             : { __rodata_start = .;     *(.rodata)  }
+    .bss                : { __bss_start = .;        *(.bss)     }
+    
+    __end = .;
 }

@@ -1,5 +1,6 @@
-//#include "stdint.h"
-typedef unsigned short uint16_t;
-void _cstart_(uint16_t bootDrive) {
+#include "stdint.h"
+
+void __attribute__((cdecl)) start(uint16_t bootDrive, void* partition)
+{
 
 }
