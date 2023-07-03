@@ -22,8 +22,8 @@ $(BUILD_DIR)/stage2.bin: $(C_OBJ_FILES) $(ASM_OBJ_FILES) linker.ld
 	$(LD)$(LDFLAGS) $(LINKERFLAGS) -o $@ $(C_OBJ_FILES) $(ASM_OBJ_FILES) -Map $(BUILD_DIR)/stage2.map
 
 $(BUILD_DIR)/stage2/c/%.o: %.c always
-	$(CC16) $(CFLAGS16) -fno-pie -c -o $@ $<
-#	$(CC16) $(CFLAGS16) -c -o $@ $<
+#	$(CC16) $(CFLAGS16) -fno-pie -c -o $@ $<
+	$(CC16) $(CFLAGS16) -c -o $@ $<
 
 $(BUILD_DIR)/stage2/asm/%.o: %.asm always
 	$(ASM) $(ASMFLAGS) -o $@ $<

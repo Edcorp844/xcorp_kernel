@@ -10,11 +10,15 @@ ASM = nasm
 SRC_DIR = src
 BUILD_DIR =build
 TOOLS_DIR = tools
-MAKE=make
+
+include buildScripts/config.mk
+
 .PHONY: all floppy_img kernel bootloader clean always tools_fat
 
 #all
 all: floppy_img tools_fat debug_tools
+
+include buildScripts/toolChains.mk
 
 #floppy img
 

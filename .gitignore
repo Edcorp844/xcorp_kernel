@@ -2,3 +2,4 @@ build/
 tools/FAT12/fat12lib
 ps.txt
 *.hex
+toolchain/
