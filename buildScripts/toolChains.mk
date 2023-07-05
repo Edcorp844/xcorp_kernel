@@ -29,6 +29,9 @@ toolchain_gcc: toolchain_binutils
 	cd toolchain && wget $(GCC_URL)
 	cd toolchain && tar -xf gcc-$(GCC_VERSION).tar.xz
 	mkdir $(GCC_BUILD)
+	sudo apt install libgmp-dev
+	sudo apt install libmpfr-dev
+	sudo apt install libmpc-dev
 	cd $(GCC_BUILD) && ../gcc-$(GCC_VERSION)/configure \
 		--prefix="$(TOOLCHAIN_PREFIX)"	\
 		--target=$(TARGET)              \
