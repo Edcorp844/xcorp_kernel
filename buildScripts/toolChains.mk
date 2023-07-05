@@ -21,7 +21,7 @@ toolchain_binutils:
 		--disable-nls					\
 		--disable-werror
 	$(MAKE) -j8 -C $(BINUTILS_BUILD)
-	$(MAKE) -C $(BINUTILS-BUILD) install
+	$(MAKE) -C $(BINUTILS_BUILD) install
 
 GCC_BUILD = toolchain/gcc-build-$(GCC_VERSION)
 
