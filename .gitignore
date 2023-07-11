@@ -5,3 +5,4 @@ ps.txt
 toolchain/
 toolcahin/
 linker.txt
+*.as

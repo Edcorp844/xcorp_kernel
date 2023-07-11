@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 #define true 1
 #define false 0
@@ -55,10 +57,15 @@ typedef struct {
 
 
 
-bool readBootSector(FILE *disk, BootSector bootsector);
-bool readSector(FILE* disk, uint32_t lba, uint32_t Count, void* BufferOut, BootSector bootsector);
-bool readfat(FILE* disk, BootSector bootsector, uint8_t* fat);
+bool readBootSector(FILE *disk, BootSector *bootsector);
+//bool readSector(FILE* disk, uint32_t lba, uint32_t Count, void* BufferOut, BootSector bootsector);
+//bool readfat(FILE* disk, BootSector bootsector, uint8_t* fat);
+bool readSector(FILE* disk, uint32_t lba, uint32_t Count, void* BufferOut, const BootSector* bootsector);
+bool readfat(FILE* disk, const BootSector* bootsector, uint8_t** fat);
+
 bool readRootDirectory(FILE* disk, BootSector bootsector, DirectoryEntry* RootDirectory);
-DirectoryEntry *findFile(const char *name, BootSector bootsector, DirectoryEntry* RootDirectory);
+//DirectoryEntry *findFile(const char *name, BootSector bootsector, DirectoryEntry* RootDirectory);
+DirectoryEntry* findFile(const char* name, const BootSector* bootsector, DirectoryEntry* RootDirectory);
+
 
 #endif

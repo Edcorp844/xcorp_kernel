@@ -1,7 +1,7 @@
 #include "headers/fat12.h"
 
-bool readBootSector(FILE *disk, BootSector bootsector) {
-    return fread(&bootsector, sizeof(bootsector),1, disk) > 0;
+bool readBootSector(FILE *disk, BootSector *bootsector) {
+    return fread(bootsector, sizeof(bootsector),1, disk) > 0;
 }
 
 bool readSector(FILE* disk, uint32_t lba, uint32_t Count, void* BufferOut, BootSector bootsector){
@@ -27,7 +27,7 @@ bool readRootDirectory(FILE* disk, BootSector bootsector, DirectoryEntry* RootDi
 	RootDirectory = (DirectoryEntry*) malloc(sectors * bootsector.BytesPerSector);
 	return readSector(disk, lba, sectors, RootDirectory, bootsector);
 }
-
+/*
 DirectoryEntry *findFile(const char *name, BootSector bootsector, DirectoryEntry* RootDirectory) {
     for(int32_t i = 0; i < bootsector.DirEntryCount; i++) {
         if (memcmp(name, RootDirectory[i].Name, 11))

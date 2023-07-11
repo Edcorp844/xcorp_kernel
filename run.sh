@@ -1,1 +1,1 @@
-qemu-system-x86_64 -fda build/main_floppy.img -nographic
+qemu-system-x86_64 -fda build/main_floppy.img #-nographic
