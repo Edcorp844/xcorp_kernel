@@ -9,6 +9,8 @@ BootSector g_bootSector;
 uint8_t* g_fat = NULL;
 DirectoryEntry* g_RootDirectory;
 
+
+
 int main(int argc, char **argv) {
 
     if (argc < 3) {

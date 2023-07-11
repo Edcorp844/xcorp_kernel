@@ -1,13 +1,12 @@
 bits 16
 
-global entry
 section .entry
 
 extern __bss_start
 extern __end
 
 extern start
-
+global entry
 
 entry:
     pusha
