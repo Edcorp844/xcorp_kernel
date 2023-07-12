@@ -6,3 +6,4 @@ toolchain/
 toolcahin/
 linker.txt
 *.as
+.vscode/
