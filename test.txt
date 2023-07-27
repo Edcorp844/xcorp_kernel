@@ -1,0 +1,13 @@
+/: Root directory of the volume.
+/bin: Directory containing essential system binaries and commands.
+/dev: Directory containing device files representing hardware devices.
+/etc: Directory containing system configuration files.
+/Library: Directory containing system-wide libraries and resources.
+/System: Directory containing system-related files and directories.
+/usr: Directory containing user utilities and applications.
+/Users: Directory containing user home directories.
+/Applications: Directory containing installed applications.
+/Volumes: Directory containing mounted volumes.
+/tmp: Directory for temporary files.
+/var: Directory containing variable data, such as logs and caches.
+/private: Directory containing private system data.
