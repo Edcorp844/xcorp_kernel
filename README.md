@@ -1,22 +1,51 @@
 # xcorp_kernel
-This is an open source hybrid kernel that was created by Frost Edson under the bachelors degree research in kampala International university in Uganda in 2023. It remains open source unitl further notice..Feel free to use it fro research work and study purposes.
+This is an open source hybrid kernel that was created by [Frost Edson](https://edcorp844.github.io/FrostEdson) under the bachelors degree research in kampala International university in Uganda in 2023. It remains open source unitl further notice..Feel free to use it fro research work and study purposes.
 
-clone the project with this command.
-``` $ git clone "https://github.com/Edcorp844/xcorp_kernel.git" ```
+## Install depandencies
+* MacOs
+```sh
+#install homebrew first if you dont have it already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-Go into the project directory.
-```$ cd xcorp_kernel```
+#THen Install Tools
+brew install llvm nasm qemu-system-x86 mtools dosfstools
+```
+* Linux
+  
+```sh
+# Ubuntu Or Debian:
+sudo apt install nasm libgmp3-dev libmpc-dev libmpfr-dev texinfo wget \
+                   mtools dosfstools libguestfs-tools qemu-system-x86
 
-Give execute file permisions to the shell scripts that will help install tools, run and debug with the fololowing command.
-```$ chmod +x debug.sh fat.sh run.sh tools.sh``` 
+## Fedora:
+sudo dnf install nasm libgmp3-dev libmpc-dev libmpfr-dev texinfo wget \
+                   mtools dosfstools libguestfs-tools qemu-system-x86
 
-Run tools to install the tools necessary to build the projects.
-```$ ./tools.sh```
-This will install the tools.
-# NOTE: This was developed on ubuntu so the comands in the file might need to be editted if you're using another platform with a different package manager.
+# Arch & Arch-based:
+paru -S gcc make libgmp-static libmpc mpfr texinfo nasm mtools qemu-system-x86
+```
+NOTE: to install all the required packages on Arch, you need an [AUR helper](https://wiki.archlinux.org/title/AUR_helpers).
 
-Run make to build the projects.
-This assumes you already have gcc or clang installed
-```$ make```
+## BUILDING.
 
-You can then run the kernel with `$ ./run.sh` command
+```sh
+$ git clone "https://github.com/Edcorp844/xcorp_kernel.git" 
+$ cd xcorp_kernel
+$ chmod +x debug.sh fat.sh run.sh
+$ make toolchain
+$ make
+```
+## Running.
+```sh
+$ ./run.sh
+```
+## Progress
+- [X] Bootloader
+- [X] Kernel
+- [ ] File System
+
+* Basically We are Still In Progress
+
+
+
+
